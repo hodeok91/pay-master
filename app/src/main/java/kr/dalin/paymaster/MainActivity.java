@@ -6,13 +6,21 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.util.Log;
+import android.webkit.ConsoleMessage;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
+
+import androidx.annotation.NonNull;
+import androidx.webkit.WebViewAssetLoader;
+import androidx.webkit.WebViewClientCompat;
 
 public class MainActivity extends Activity {
 
+    private static final String TAG = "PayMaster";
     private WebView webView;
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -25,13 +33,47 @@ public class MainActivity extends Activity {
 
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setDomStorageEnabled(true);
-        webView.getSettings().setAllowFileAccess(true);
 
-        webView.setWebViewClient(new WebViewClient());
-        webView.setWebChromeClient(new WebChromeClient());
+        final WebViewAssetLoader assetLoader =
+                new WebViewAssetLoader.Builder()
+                        .addPathHandler(
+                                "/assets/",
+                                new WebViewAssetLoader.AssetsPathHandler(this)
+                        )
+                        .build();
+
+        webView.setWebViewClient(new WebViewClientCompat() {
+            @Override
+            public WebResourceResponse shouldInterceptRequest(
+                    @NonNull WebView view,
+                    @NonNull WebResourceRequest request
+            ) {
+                return assetLoader.shouldInterceptRequest(request.getUrl());
+            }
+        });
+
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+                Log.d(
+                        TAG,
+                        consoleMessage.message()
+                                + " -- From line "
+                                + consoleMessage.lineNumber()
+                                + " of "
+                                + consoleMessage.sourceId()
+                );
+                return true;
+            }
+        });
+
         webView.addJavascriptInterface(new Bridge(), "AndroidBridge");
 
-        webView.loadUrl("file:///android_asset/www/index.html");
+        // file:// 로 직접 열지 않고, Android 공식 로컬 자산용 HTTPS 주소로 연다.
+        // 이렇게 해야 ES module(import/export)이 동일 출처로 정상 로드된다.
+        webView.loadUrl(
+                "https://appassets.androidplatform.net/assets/www/index.html"
+        );
     }
 
     @Override
