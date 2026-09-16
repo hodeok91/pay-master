@@ -1,4 +1,3 @@
-\
 package kr.dalin.paymaster;
 
 import android.annotation.SuppressLint;

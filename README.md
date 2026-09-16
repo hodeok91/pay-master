@@ -1,4 +1,4 @@
-# 페이의 달인 — Modular v0.1.2
+# 페이의 달인 — Modular v0.1.3
 
 이 ZIP은 부분 패치가 아니라 **현재 수정 사항을 모두 합친 전체 프로젝트**입니다.
 
@@ -11,7 +11,7 @@
 - ES module(`import/export`) 로딩 대응
 - 시작 실패 시 완전한 검은 화면 대신 오류/로딩 화면 표시
 - GitHub Actions의 SDK 라이선스 대기 문제를 일으킨 setup-android 단계 제거
-- 앱 버전 `0.1.2`, versionCode `12`
+- 앱 버전 `0.1.2`, versionCode `13`
 - 모듈 구조(core / pays/samsung / 화면별 module) 유지
 
 ## 교육용 원칙
@@ -24,5 +24,5 @@
 `adb shell dumpsys package kr.dalin.paymaster | Select-String "versionName|versionCode"`
 
 정상:
-- versionCode=12
-- versionName=0.1.2
+- versionCode=13
+- versionName=0.1.3
