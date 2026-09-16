@@ -1,2 +1,44 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><link rel="stylesheet" href="style.css"><title>페이의 달인</title></head>
-<body><main id="app"></main><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#111318">
+  <title>페이의 달인</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main id="app">
+    <section class="screen home-screen">
+      <div class="brand">
+        <div class="mark">P</div>
+        <p class="eyebrow">교육용 모바일 결제 연습</p>
+        <h1>페이의 달인</h1>
+        <p class="lead">어떤 페이를 연습할까요?</p>
+      </div>
+
+      <div class="pay-list">
+        <button class="pay-card active" id="samsungPayBtn" type="button">
+          <span class="pay-icon">S</span>
+          <span>
+            <strong>삼성페이 연습</strong>
+            <small>카드 등록부터 결제까지 연습해요</small>
+          </span>
+          <span class="arrow">›</span>
+        </button>
+
+        <button class="pay-card disabled" type="button" disabled>
+          <span class="pay-icon muted">+</span>
+          <span>
+            <strong>다른 페이</strong>
+            <small>준비 중</small>
+          </span>
+        </button>
+      </div>
+
+      <p class="notice">실제 결제가 이루어지지 않는 교육용 시뮬레이터입니다.</p>
+    </section>
+  </main>
+  <script src="./app.js"></script>
+</body>
+</html>

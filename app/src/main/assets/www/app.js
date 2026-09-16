@@ -1,6 +1,34 @@
-const app=document.querySelector('#app');
-function splash(){app.innerHTML=`<section class="screen splash"><div class="bolt">⚡</div><div class="brand">페이의 달인</div><div class="sub">모바일 결제 연습을 시작합니다</div></section>`;setTimeout(home,1800)}
-function home(){app.innerHTML=`<section class="screen home"><div class="sub">달인연구소 학습 시뮬레이터</div><h1>어떤 페이를 연습할까요?</h1><div class="sub">실제 결제가 아닌 교육용 연습입니다.</div><button class="pay" onclick="samsung()"><b>삼성페이 연습</b>달인카드로 결제 과정을 연습해요</button><button class="pay disabled"><b>다른 페이</b>준비 중</button><div class="edu">페이의 달인 · 교육용 시뮬레이터 v0.0.1</div></section>`}
-function samsung(){app.innerHTML=`<section class="screen wallet"><div class="top">페이의 달인 · 삼성페이 연습</div><h2>결제 카드</h2><div class="card"><div class="title">달인카드</div><div>교육용 카드 · •••• 0910</div></div><div class="actions"><button class="primary" onclick="alert('v0.0.1에서는 삼성페이 모듈 진입까지 확인합니다.')">결제 연습</button></div><div id="hint"></div><button class="tip" onclick="tip()">TIP</button><div class="edu">실제 Samsung Wallet이 아닌 교육용 모의 화면입니다.</div></section>`}
-function tip(){document.querySelector('#hint').innerHTML='<div class="hint"><b>도움말</b><br>달인카드를 선택한 뒤 결제 연습을 진행합니다. TIP은 행동을 대신하지 않고 현재 해야 할 일을 알려줍니다.</div>'}
-splash();
+(() => {
+  "use strict";
+
+  const app = document.getElementById("app");
+  const btn = document.getElementById("samsungPayBtn");
+
+  if (!app || !btn) return;
+
+  btn.addEventListener("click", () => {
+    app.innerHTML = `
+      <section class="wallet">
+        <div class="wallet-top">
+          <h2>Samsung Pay 연습</h2>
+          <span class="practice">페이의 달인 · 교육용</span>
+        </div>
+
+        <div class="dalin-card">
+          <div>
+            <div class="title">달인카드</div>
+            <p>모바일 결제 연습 카드</p>
+          </div>
+          <div class="number">•••• •••• •••• 0910</div>
+        </div>
+
+        <button class="tip" id="tipBtn" type="button">TIP · 도움 요청하기</button>
+      </section>
+    `;
+
+    const tip = document.getElementById("tipBtn");
+    tip?.addEventListener("click", () => {
+      alert("이 화면은 삼성페이 결제 과정을 연습하는 교육용 화면입니다. 다음 버전에서 달인카드 등록 절차를 연결합니다.");
+    });
+  });
+})();
