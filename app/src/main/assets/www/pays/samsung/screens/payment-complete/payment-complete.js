@@ -1,0 +1,2 @@
+import {router} from "../../../../core/navigation/router.js"; import {screen,bottomButton} from "../common.js";
+export function renderPaymentComplete(){const s=screen("");s.innerHTML=`<div class="center" style="padding-top:28vh"><div style="font-size:76px">✓</div><h1>결제가 완료되었습니다</h1><p class="muted">교육용 결제 연습이 완료되었습니다.</p></div>`;bottomButton(s,"완료",()=>router.go("samsung.wallet",{}, {replace:true}));return s;}

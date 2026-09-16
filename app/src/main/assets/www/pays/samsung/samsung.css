@@ -1,0 +1,14 @@
+.samsung .wallet-title{font-size:30px;font-weight:900}
+.wallet-actions{margin-left:auto;font-size:38px;display:flex;gap:22px}
+.notice{margin:4px 24px 0;padding:22px;background:#1b1b22;border-radius:24px;color:#d8d8dd}
+.wallet-card-wrap{display:grid;place-items:center;margin-top:155px}
+.quick-nav{position:absolute;bottom:24px;left:17%;right:17%;height:88px;border-radius:50px;background:#29292c;display:flex;align-items:center;justify-content:space-around;font-weight:800}
+.help-btn{position:absolute;right:22px;bottom:126px;border:0;background:#303034;border-radius:50px;padding:14px 18px;font-weight:800}
+.form-title{padding:20px 28px 8px;font-size:28px;font-weight:800}
+.signature-pad{position:absolute;left:7%;right:7%;top:34%;height:24%;background:#fff;border-radius:22px;touch-action:none}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;width:75%;margin:55px auto 0;text-align:center;font-size:31px}
+.keypad button{border:0;background:none;padding:12px}
+.dots{text-align:center;font-size:38px;letter-spacing:14px;color:#6c7cff}
+.auth-phone{width:42%;height:30%;margin:15vh auto 0;background:#dce1ec;border-radius:28px 28px 0 0;position:relative}
+.fingerprint{position:absolute;left:50%;bottom:10%;transform:translate(-50%,50%);width:120px;height:120px;border-radius:50%;background:#fff;color:#000;display:grid;place-items:center;font-size:58px;user-select:none}
+.payment-card{transform:rotate(90deg) scale(.82);margin:80px auto 10px}

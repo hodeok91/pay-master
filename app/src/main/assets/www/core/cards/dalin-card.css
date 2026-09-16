@@ -1,0 +1,6 @@
+.dalin-card{aspect-ratio:1.586;width:min(82vw,620px);border-radius:24px;position:relative;overflow:hidden;
+ background:linear-gradient(135deg,#ffb06d,#e68145 52%,#ffc18e);box-shadow:0 12px 35px #0008;border:2px solid #ffc99f}
+.dalin-card:before{content:"DALIN";position:absolute;right:22px;top:18px;font-size:24px;font-weight:900;letter-spacing:2px;color:#7b3d1c}
+.dalin-card .chip{position:absolute;left:11%;top:35%;width:64px;height:48px;border-radius:9px;background:linear-gradient(135deg,#eee,#aaa)}
+.dalin-card .brand{position:absolute;right:7%;bottom:7%;font-size:36px;font-weight:900;color:#1264c5}
+.dalin-card .name{position:absolute;left:8%;bottom:8%;font-weight:800;color:#713817}

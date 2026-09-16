@@ -1,6 +1,4 @@
-plugins {
-    id("com.android.application")
-}
+plugins { id("com.android.application") }
 
 android {
     namespace = "kr.dalin.paymaster"
@@ -10,10 +8,7 @@ android {
         applicationId = "kr.dalin.paymaster"
         minSdk = 26
         targetSdk = 35
-        versionCode = 3
-        versionName = "0.0.3"
+        versionCode = 10
+        versionName = "0.1.0"
     }
-}
-
-dependencies {
 }

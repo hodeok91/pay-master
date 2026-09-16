@@ -1,6 +1,23 @@
-# 페이의 달인 v0.0.3
+# 페이의 달인 — Modular v0.1.0
 
-실제 Logcat에서 확인된 `ClassNotFoundException: kr.dalin.paymaster.MainActivity`를 수정한 버전입니다.
+특수교육 학생의 모바일 결제 학습을 위한 **교육용 시뮬레이터** 프로젝트입니다.
 
-v0.0.2는 Kotlin 플러그인 없이 `MainActivity.kt`를 사용해 APK 빌드는 성공했지만 Activity 클래스가 DEX에 포함되지 않았습니다.
-v0.0.3은 Activity를 Java로 전환하여 현재 Gradle 구성만으로 컴파일되도록 수정했습니다.
+## 구조 원칙
+- `core/`: 결제 종류와 무관한 공통 기능
+- `pays/samsung/`: Samsung Pay 연습 모듈 전용 UI/상태/튜토리얼
+- `pays/kakao`, `pays/naver`: 후속 모듈 자리
+- `core/cards/dalin-card`: 실제 금융카드 대신 사용하는 교육용 달인카드
+- `core/tutorial`: TIP 요청형 도움 시스템
+- Android WebView + Native Bridge 구조
+
+## 현재 구현 흐름
+Splash → 페이 선택 → Wallet → 카드 추가 → 카드 스캔 → 카드 정보 → 약관 →
+3초 지문 시뮬레이션 → 6자리 비밀번호 등록/확인 → 서명 →
+카드 추가 완료 → Wallet → 결제 인증 → 결제 준비/리더기 → 교육용 결제 완료
+
+실제 카드정보·실제 생체정보·실제 금융결제는 사용하지 않습니다.
+
+## 중요
+이 버전은 **정식 모듈 구조를 먼저 확립한 소스 프로젝트**입니다.
+사용자가 제공한 Samsung Wallet 32장 캡처는 UI/동작 기준 자료이며,
+후속 버전에서 각 화면의 간격·폰트·아이콘·애니메이션을 더 정밀하게 맞춥니다.
