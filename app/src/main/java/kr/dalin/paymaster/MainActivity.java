@@ -1,3 +1,4 @@
+\
 package kr.dalin.paymaster;
 
 import android.annotation.SuppressLint;
@@ -58,9 +59,9 @@ public class MainActivity extends Activity {
                 Log.d(
                         TAG,
                         consoleMessage.message()
-                                + " -- From line "
+                                + " -- line "
                                 + consoleMessage.lineNumber()
-                                + " of "
+                                + " / "
                                 + consoleMessage.sourceId()
                 );
                 return true;
@@ -69,8 +70,7 @@ public class MainActivity extends Activity {
 
         webView.addJavascriptInterface(new Bridge(), "AndroidBridge");
 
-        // file:// 로 직접 열지 않고, Android 공식 로컬 자산용 HTTPS 주소로 연다.
-        // 이렇게 해야 ES module(import/export)이 동일 출처로 정상 로드된다.
+        // ES module(import/export)을 file://로 열지 않는다.
         webView.loadUrl(
                 "https://appassets.androidplatform.net/assets/www/index.html"
         );
@@ -85,7 +85,7 @@ public class MainActivity extends Activity {
         }
 
         webView.evaluateJavascript(
-                "window.PayMaster?.back?.()",
+                "window.PayMaster && window.PayMaster.back ? window.PayMaster.back() : false",
                 result -> {
                     if ("false".equals(result) || "null".equals(result)) {
                         MainActivity.super.onBackPressed();
