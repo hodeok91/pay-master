@@ -1,4 +1,4 @@
-import {renderContactlessScreen} from "../../../../core/payment/contactless-screen.js";
+import {renderContactlessScreen} from "../../../core/payment/contactless-screen.js";
 
 export function renderKakaoContactless(){
   return renderContactlessScreen({

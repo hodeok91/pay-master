@@ -1,4 +1,4 @@
-# 페이의 달인 v0.2.1
+# 페이의 달인 v0.2.2
 
 v0.2.0 기반 RF/HCE + MST capability 테스트 버전.
 
@@ -16,8 +16,14 @@ v0.2.0 기반 RF/HCE + MST capability 테스트 버전.
 - Samsung Pay 기존 HCE 및 EP-705 진단 유지
 
 ## 버전
-- versionName: 0.2.1
-- versionCode: 21
+- versionName: 0.2.2
+- versionCode: 22
 
 ## 테스트
 `docs/TEST-v0.2.1-RF-MST.md`
+
+
+## v0.2.2 Hotfix
+- Kakao/Naver/PAYCO screen module relative import paths corrected.
+- Startup freeze at `앱을 불러오는 중...` fixed.
+- Preflight now validates local ES module import targets.

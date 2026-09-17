@@ -1,14 +1,14 @@
-import {router} from "../../../../core/navigation/router.js";
+import {router} from "../../../core/navigation/router.js";
 import {
   loadWallet,
   formatMoney,
   walletPresentPayload
-} from "../../../../core/wallet/wallet-store.js";
+} from "../../../core/wallet/wallet-store.js";
 import {
   generateCode,
   scanQr
-} from "../../../../core/native/native-bridge.js";
-import {installQrResultHandler} from "../../../../core/payment/scan-payment.js";
+} from "../../../core/native/native-bridge.js";
+import {installQrResultHandler} from "../../../core/payment/scan-payment.js";
 
 export function renderKakaoPay(){
   const wallet = loadWallet();

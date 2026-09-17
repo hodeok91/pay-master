@@ -1,7 +1,7 @@
-import {router} from "../../../../core/navigation/router.js";
-import {scanQr} from "../../../../core/native/native-bridge.js";
-import {formatMoney} from "../../../../core/wallet/wallet-store.js";
-import {installQrResultHandler} from "../../../../core/payment/scan-payment.js";
+import {router} from "../../../core/navigation/router.js";
+import {scanQr} from "../../../core/native/native-bridge.js";
+import {formatMoney} from "../../../core/wallet/wallet-store.js";
+import {installQrResultHandler} from "../../../core/payment/scan-payment.js";
 
 export function renderPaycoScan(){
   const s = document.createElement("section");

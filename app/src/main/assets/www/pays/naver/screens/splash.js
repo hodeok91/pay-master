@@ -1,4 +1,4 @@
-import {router} from "../../../../core/navigation/router.js";
+import {router} from "../../../core/navigation/router.js";
 
 export function renderNaverSplash(){
   const s = document.createElement("section");

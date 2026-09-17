@@ -1,5 +1,5 @@
-import {router} from "../../../../core/navigation/router.js";
-import {loadWallet,formatMoney} from "../../../../core/wallet/wallet-store.js";
+import {router} from "../../../core/navigation/router.js";
+import {loadWallet,formatMoney} from "../../../core/wallet/wallet-store.js";
 
 export function renderPaycoHome(){
   const wallet = loadWallet();

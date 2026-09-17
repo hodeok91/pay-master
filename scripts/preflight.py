@@ -203,6 +203,25 @@ for rel in [
         if 'router.go("samsung.wallet")' in text:
             errors.append(f"old cross-provider Samsung route remains: {rel}")
 
+# v0.2.2: validate relative ES module imports resolve to real files.
+import re as _re
+
+www_root = root / "app/src/main/assets/www"
+_import_re = _re.compile(r'import\\s+(?:[^\\n;]+?\\s+from\\s+)?[\"\']([^\"\']+)[\"\']')
+
+for js_file in www_root.rglob("*.js"):
+    source = js_file.read_text(encoding="utf-8", errors="replace")
+    for match in _import_re.finditer(source):
+        spec = match.group(1)
+        if not spec.startswith("."):
+            continue
+        resolved = (js_file.parent / spec).resolve()
+        if not resolved.exists():
+            errors.append(
+                "broken JS import: "
+                f"{js_file.relative_to(root)} -> {spec}"
+            )
+
 if errors:
     print("PRECHECK FAILED")
     for e in errors:
