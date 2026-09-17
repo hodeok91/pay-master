@@ -1,0 +1,9 @@
+.payco{background:#111;color:white}
+.payco .p-head{background:white;color:#111;padding:12px 18px 8px}
+.payco .p-title{font-size:28px;font-weight:900}
+.payco .p-tabs{display:flex;gap:18px;margin-top:10px;font-size:19px;font-weight:900}
+.payco .p-tabs span:first-child{color:#aaa}
+.payco .p-scan{position:relative;height:calc(100dvh - 120px);background:radial-gradient(circle at 50% 45%,#7a7062,#191816 70%)}
+.payco .p-frame{position:absolute;left:19%;right:19%;top:27%;aspect-ratio:1;border:2px solid white;border-radius:18px}
+.payco .p-actions{position:absolute;top:13%;left:0;right:0;display:flex;justify-content:center;gap:10px}
+.payco .p-actions button{border:0;background:#070707;border-radius:999px;padding:10px 16px;font-weight:900}

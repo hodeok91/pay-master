@@ -1,31 +1,23 @@
-# 페이의 달인 — Modular v0.1.6 HCE Diagnostic
+# 페이의 달인 v0.2.1
 
-이 ZIP은 **부분 패치가 아닌 전체 프로젝트 기준본**이다.
+v0.2.0 기반 RF/HCE + MST capability 테스트 버전.
 
-## v0.1.6 목적
-
-EP-705 `FB1120 / mode=212` 결제대기 상태에서
-페이의 달인 HCE 서비스까지 실제 APDU가 전달되는지 확인한다.
-
-`DALIN-PAY NFC Protocol v1`의 AID와 명령 규격은
-v0.1.5와 동일하게 유지한다.
-
-## 추가 기능
-
-- HCE APDU 수신 횟수
-- 마지막 APDU HEX
-- DALIN-PAY AID SELECT 여부
-- HCE deactivation 사유
-- APDU RX/TX logcat
-- 결제 대기 화면의 `HCE 진단 보기`
-- PC용 `tools/ep705-hce-diagnostics.ps1`
+## 변경
+- Kakao Pay의 `삼성페이` 탭이 더 이상 Samsung Pay 모듈로 이동하지 않음
+- N Pay의 `삼성페이` 탭이 더 이상 Samsung Pay 모듈로 이동하지 않음
+- 각 앱 내부에서 별도의 RF/HCE 결제대기 화면으로 즉시 진입
+- 별도 인증 없이 바로 50초 RF/HCE 대기
+- HCE 상세 trace 최대 40개 이벤트 저장
+- APDU RX / TX / DALIN AID SELECT / deactivation 기록
+- 진단 로그 클립보드 복사
+- 기기 모델 / Android / NFC / Samsung Wallet 패키지 감지
+- 직접 MST 송신 API 여부를 별도 표시
+- QR / 바코드 / 학급화폐 기능 유지
+- Samsung Pay 기존 HCE 및 EP-705 진단 유지
 
 ## 버전
+- versionName: 0.2.1
+- versionCode: 21
 
-- versionName: `0.1.6`
-- versionCode: `16`
-- DALIN-PAY NFC Protocol: `v1`
-- AID: `F044414C494E0101`
-
-상세:
-`docs/EP705-HCE-DIAGNOSTIC-v0.1.6.md`
+## 테스트
+`docs/TEST-v0.2.1-RF-MST.md`

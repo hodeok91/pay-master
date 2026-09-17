@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.SystemClock;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 public final class HceDiagnostics {
@@ -13,6 +14,7 @@ public final class HceDiagnostics {
     public static final String EXTRA_EVENT_JSON = "eventJson";
 
     private static final String PREFS = "dalin_hce_diagnostics";
+    private static final int MAX_TRACE = 40;
 
     private HceDiagnostics() {}
 
@@ -24,8 +26,10 @@ public final class HceDiagnostics {
                 .putString("lastApduHex", "")
                 .putString("lastEvent", "RESET")
                 .putString("lastDeactivateReason", "")
+                .putString("traceJson", "[]")
                 .putLong("lastEventElapsedMs", SystemClock.elapsedRealtime())
                 .apply();
+        appendTrace(context, "RESET", "");
         emit(context, "RESET", "");
     }
 
@@ -41,6 +45,7 @@ public final class HceDiagnostics {
                 .putLong("lastEventElapsedMs", SystemClock.elapsedRealtime())
                 .apply();
 
+        appendTrace(context, "RX", hex);
         emit(context, "APDU_RX", hex);
     }
 
@@ -50,11 +55,15 @@ public final class HceDiagnostics {
                 .putString("lastEvent", "OUR_AID_SELECTED")
                 .putLong("lastEventElapsedMs", SystemClock.elapsedRealtime())
                 .apply();
+
+        appendTrace(context, "AID", DalinPayProtocol.AID_HEX);
         emit(context, "OUR_AID_SELECTED", DalinPayProtocol.AID_HEX);
     }
 
     public static synchronized void recordResponse(Context context, byte[] response) {
-        emit(context, "APDU_TX", toHexLimited(response, 256));
+        String hex = toHexLimited(response, 256);
+        appendTrace(context, "TX", hex);
+        emit(context, "APDU_TX", hex);
     }
 
     public static synchronized void recordDeactivated(Context context, int reason) {
@@ -73,7 +82,29 @@ public final class HceDiagnostics {
                 .putLong("lastEventElapsedMs", SystemClock.elapsedRealtime())
                 .apply();
 
+        appendTrace(context, "DEACTIVATED", reasonText);
         emit(context, "DEACTIVATED", reasonText);
+    }
+
+    private static void appendTrace(Context context, String type, String detail) {
+        try {
+            SharedPreferences p = prefs(context);
+            JSONArray oldArr = new JSONArray(p.getString("traceJson", "[]"));
+            JSONArray next = new JSONArray();
+
+            int start = Math.max(0, oldArr.length() - (MAX_TRACE - 1));
+            for (int i = start; i < oldArr.length(); i++) {
+                next.put(oldArr.get(i));
+            }
+
+            JSONObject item = new JSONObject();
+            item.put("t", SystemClock.elapsedRealtime());
+            item.put("type", type);
+            item.put("detail", detail == null ? "" : detail);
+            next.put(item);
+
+            p.edit().putString("traceJson", next.toString()).apply();
+        } catch (Exception ignored) {}
     }
 
     public static synchronized String snapshotJson(Context context) {
@@ -88,9 +119,40 @@ public final class HceDiagnostics {
             o.put("lastEventElapsedMs", p.getLong("lastEventElapsedMs", 0L));
             o.put("aid", DalinPayProtocol.AID_HEX);
             o.put("protocolVersion", DalinPayProtocol.PROTOCOL_VERSION);
+            o.put("trace", new JSONArray(p.getString("traceJson", "[]")));
             return o.toString();
         } catch (Exception e) {
             return "{\"error\":\"snapshot_failed\"}";
+        }
+    }
+
+    public static synchronized String traceText(Context context) {
+        try {
+            JSONObject snap = new JSONObject(snapshotJson(context));
+            JSONArray trace = snap.optJSONArray("trace");
+            StringBuilder sb = new StringBuilder();
+            sb.append("DALIN-PAY HCE TRACE\n");
+            sb.append("AID=").append(DalinPayProtocol.AID_HEX).append('\n');
+            sb.append("APDU_COUNT=").append(snap.optInt("apduCount")).append('\n');
+            sb.append("OUR_AID_SELECTED=").append(snap.optBoolean("ourAidSelected")).append('\n');
+            sb.append("LAST_DEACTIVATE=").append(snap.optString("lastDeactivateReason")).append('\n');
+            sb.append('\n');
+
+            if (trace != null) {
+                for (int i = 0; i < trace.length(); i++) {
+                    JSONObject item = trace.optJSONObject(i);
+                    if (item == null) continue;
+                    sb.append(item.optLong("t"))
+                      .append("  ")
+                      .append(item.optString("type"))
+                      .append("  ")
+                      .append(item.optString("detail"))
+                      .append('\n');
+                }
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            return "TRACE_FAILED";
         }
     }
 
@@ -109,8 +171,7 @@ public final class HceDiagnostics {
             intent.setPackage(context.getPackageName());
             intent.putExtra(EXTRA_EVENT_JSON, o.toString());
             context.sendBroadcast(intent);
-        } catch (Exception ignored) {
-        }
+        } catch (Exception ignored) {}
     }
 
     public static String toHexLimited(byte[] data, int maxBytes) {
@@ -126,7 +187,6 @@ public final class HceDiagnostics {
         if (data.length > length) {
             sb.append(" ...(").append(data.length).append(" bytes)");
         }
-
         return sb.toString();
     }
 }

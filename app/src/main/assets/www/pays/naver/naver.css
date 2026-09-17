@@ -1,0 +1,13 @@
+.naver{background:#09151e;color:white}
+.naver .n-splash-logo{font-size:44px;font-weight:900;letter-spacing:-2px}
+.naver .n-tabs{height:68px;display:grid;grid-template-columns:repeat(3,1fr);align-items:end;border-bottom:1px solid #ffffff33}
+.naver .n-tab{padding:16px 4px 13px;text-align:center;font-weight:900;color:#aaa}
+.naver .n-tab.active{color:white;border-bottom:3px solid white}
+.scan-stage{position:relative;height:calc(100dvh - 68px);overflow:hidden;background:linear-gradient(#5b5b5b,#222 55%,#120808)}
+.scan-stage:before{content:"";position:absolute;inset:0;background:rgba(0,0,0,.20)}
+.scan-frame{position:absolute;left:13%;right:13%;top:31%;aspect-ratio:1;border:0}
+.scan-frame i{position:absolute;width:52px;height:52px;border-color:#00e872;border-style:solid}
+.scan-frame i:nth-child(1){left:0;top:0;border-width:6px 0 0 6px;border-radius:16px 0 0 0}
+.scan-frame i:nth-child(2){right:0;top:0;border-width:6px 6px 0 0;border-radius:0 16px 0 0}
+.scan-frame i:nth-child(3){left:0;bottom:0;border-width:0 0 6px 6px;border-radius:0 0 0 16px}
+.scan-frame i:nth-child(4){right:0;bottom:0;border-width:0 6px 6px 0;border-radius:0 0 16px 0}

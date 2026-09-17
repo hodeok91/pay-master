@@ -1,0 +1,10 @@
+.kakao{background:#0d0f13;color:#f6f6f7}
+.kakao .k-header{height:64px;padding:0 18px;display:flex;align-items:center;justify-content:space-between}
+.k-logo{font-size:26px;font-weight:900}
+.k-pill{background:#ffd900;color:#111;border-radius:999px;padding:7px 11px;font-weight:900}
+.k-card{background:#181b20;border-radius:24px;padding:18px}
+.k-bottom{position:absolute;left:0;right:0;bottom:0;background:#ffd800;color:#111;padding:15px 18px calc(15px + env(safe-area-inset-bottom));font-size:19px;font-weight:900;text-align:center;border-radius:24px 24px 0 0}
+.k-pay-sheet{background:#181b20}
+.k-tabs{display:grid;grid-template-columns:repeat(3,1fr);background:#090b0e;border-radius:22px;padding:4px;margin:12px 16px}
+.k-tab{border:0;background:transparent;padding:12px 6px;border-radius:18px;font-weight:800}
+.k-tab.active{background:#34373d}

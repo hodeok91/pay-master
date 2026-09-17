@@ -127,6 +127,82 @@ if protocol_java.exists():
     if 'AID_HEX = "F044414C494E0101"' not in protocol_text:
         errors.append("v0.1.6 must not change DALIN-PAY v1 AID.")
 
+# v0.2.0 multi-pay / classroom currency checks.
+required_v020 = [
+    root / "app/src/main/assets/www/core/wallet/wallet-store.js",
+    root / "app/src/main/assets/www/core/payment/scan-payment.js",
+    root / "app/src/main/assets/www/home/teacher-wallet.js",
+    root / "app/src/main/assets/www/pays/kakao/kakao.js",
+    root / "app/src/main/assets/www/pays/naver/naver.js",
+    root / "app/src/main/assets/www/pays/payco/payco.js",
+]
+
+for p4 in required_v020:
+    if not p4.exists():
+        errors.append(f"missing v0.2.0 file: {p4.relative_to(root)}")
+
+build_gradle = root / "app/build.gradle.kts"
+if build_gradle.exists():
+    t = build_gradle.read_text(encoding="utf-8", errors="replace")
+    if 'zxing-android-embedded:4.3.0' not in t:
+        errors.append("ZXing dependency missing.")
+
+main_activity = root / "app/src/main/java/kr/dalin/paymaster/MainActivity.java"
+if main_activity.exists():
+    t = main_activity.read_text(encoding="utf-8", errors="replace")
+    for token in ["generateCode(", "scanQr()", "IntentIntegrator", "CODE_128", "QR_CODE"]:
+        if token not in t:
+            errors.append(f"native QR/barcode support missing: {token}")
+
+wallet_store = root / "app/src/main/assets/www/core/wallet/wallet-store.js"
+if wallet_store.exists():
+    t = wallet_store.read_text(encoding="utf-8", errors="replace")
+    for token in ["addBalance", "debitBalance", "INSUFFICIENT_BALANCE", "merchantQrPayload"]:
+        if token not in t:
+            errors.append(f"classroom wallet contract missing: {token}")
+
+app_js = root / "app/src/main/assets/www/app.js"
+if app_js.exists():
+    t = app_js.read_text(encoding="utf-8", errors="replace")
+    for route_token in ["kakaoPay", "naverPay", "paycoPay", "teacher.wallet"]:
+        if route_token not in t:
+            errors.append(f"app registration missing: {route_token}")
+
+# v0.2.1 RF/MST diagnostic checks
+required_v021 = [
+    root / "app/src/main/assets/www/core/payment/contactless-screen.js",
+    root / "app/src/main/assets/www/pays/kakao/screens/contactless.js",
+    root / "app/src/main/assets/www/pays/naver/screens/contactless.js",
+    root / "docs/TEST-v0.2.1-RF-MST.md",
+]
+for p5 in required_v021:
+    if not p5.exists():
+        errors.append(f"missing v0.2.1 file: {p5.relative_to(root)}")
+
+main_activity = root / "app/src/main/java/kr/dalin/paymaster/MainActivity.java"
+if main_activity.exists():
+    text = main_activity.read_text(encoding="utf-8", errors="replace")
+    for token in ["getDeviceCapabilities", "getHceTraceText", "copyText", "com.samsung.android.spay"]:
+        if token not in text:
+            errors.append(f"v0.2.1 capability diagnostic missing: {token}")
+
+hce_diag = root / "app/src/main/java/kr/dalin/paymaster/nfc/HceDiagnostics.java"
+if hce_diag.exists():
+    text = hce_diag.read_text(encoding="utf-8", errors="replace")
+    for token in ["MAX_TRACE", "traceJson", "traceText", "appendTrace"]:
+        if token not in text:
+            errors.append(f"v0.2.1 HCE trace missing: {token}")
+
+for rel in [
+    "app/src/main/assets/www/pays/kakao/screens/pay.js",
+    "app/src/main/assets/www/pays/naver/screens/scan.js",
+]:
+    p = root / rel
+    if p.exists():
+        text = p.read_text(encoding="utf-8", errors="replace")
+        if 'router.go("samsung.wallet")' in text:
+            errors.append(f"old cross-provider Samsung route remains: {rel}")
+
 if errors:
     print("PRECHECK FAILED")
     for e in errors:

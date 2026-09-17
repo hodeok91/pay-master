@@ -1,5 +1,5 @@
-페이의 달인 Modular v0.1.6 FULL HCE DIAGNOSTIC
-versionCode=16
-DALIN-PAY NFC Protocol v1 unchanged
-AID=F044414C494E0101 unchanged
-APDU RX/TX/AID/deactivation diagnostics added
+페이의 달인 v0.2.1 FULL RF-MST TEST
+versionCode=21
+Independent Kakao/Naver contactless test flows
+HCE trace + Samsung Wallet capability probe
+No direct raw MST credential transmission

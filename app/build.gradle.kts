@@ -8,11 +8,12 @@ android {
         applicationId = "kr.dalin.paymaster"
         minSdk = 26
         targetSdk = 35
-        versionCode = 16
-        versionName = "0.1.6"
+        versionCode = 21
+        versionName = "0.2.1"
     }
 }
 
 dependencies {
     implementation("androidx.webkit:webkit:1.12.1")
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
 }

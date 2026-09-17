@@ -4,14 +4,19 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.ClipboardManager;
+import android.content.ClipData;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.nfc.NfcAdapter;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.util.Base64;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.webkit.ConsoleMessage;
@@ -25,7 +30,16 @@ import androidx.annotation.NonNull;
 import androidx.webkit.WebViewAssetLoader;
 import androidx.webkit.WebViewClientCompat;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.Result;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
+
 import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
 
 import kr.dalin.paymaster.nfc.DalinHostApduService;
 import kr.dalin.paymaster.nfc.HceDiagnostics;
@@ -74,21 +88,14 @@ public class MainActivity extends Activity {
 
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
-            public boolean onConsoleMessage(ConsoleMessage m) {
-                Log.d(
-                        TAG,
-                        m.message() +
-                        " -- line " +
-                        m.lineNumber() +
-                        " / " +
-                        m.sourceId()
-                );
+            public boolean onConsoleMessage(ConsoleMessage msg) {
+                Log.d(TAG, msg.message() + " -- line " +
+                        msg.lineNumber() + " / " + msg.sourceId());
                 return true;
             }
         });
 
         webView.addJavascriptInterface(new Bridge(), "AndroidBridge");
-
         registerPaymentReceiver();
 
         webView.loadUrl(
@@ -104,24 +111,18 @@ public class MainActivity extends Activity {
 
                 if (DalinHostApduService.ACTION_PAYMENT_SUCCESS.equals(action)) {
                     String tx = intent.getStringExtra(
-                            DalinHostApduService.EXTRA_TRANSACTION_ID
-                    );
+                            DalinHostApduService.EXTRA_TRANSACTION_ID);
                     long amount = intent.getLongExtra(
-                            DalinHostApduService.EXTRA_AMOUNT,
-                            0L
-                    );
+                            DalinHostApduService.EXTRA_AMOUNT, 0L);
                     String currency = intent.getStringExtra(
-                            DalinHostApduService.EXTRA_CURRENCY
-                    );
+                            DalinHostApduService.EXTRA_CURRENCY);
 
                     try {
                         JSONObject payload = new JSONObject();
                         payload.put("tx", tx == null ? "" : tx);
                         payload.put("amount", amount);
-                        payload.put(
-                                "currency",
-                                currency == null ? "KRW" : currency
-                        );
+                        payload.put("currency",
+                                currency == null ? "KRW" : currency);
 
                         final String quoted =
                                 JSONObject.quote(payload.toString());
@@ -131,28 +132,20 @@ public class MainActivity extends Activity {
                                 webView.evaluateJavascript(
                                         "window.PayMasterNfcSuccess && " +
                                         "window.PayMasterNfcSuccess(" +
-                                        quoted +
-                                        ");",
+                                        quoted + ");",
                                         null
                                 );
                             }
                         });
-
                     } catch (Exception e) {
-                        Log.e(
-                                TAG,
-                                "Failed to deliver NFC payment callback",
-                                e
-                        );
+                        Log.e(TAG, "NFC callback failed", e);
                     }
-
                     return;
                 }
 
                 if (HceDiagnostics.ACTION_DIAGNOSTIC.equals(action)) {
                     String eventJson = intent.getStringExtra(
-                            HceDiagnostics.EXTRA_EVENT_JSON
-                    );
+                            HceDiagnostics.EXTRA_EVENT_JSON);
 
                     final String quoted = JSONObject.quote(
                             eventJson == null ? "{}" : eventJson
@@ -163,8 +156,7 @@ public class MainActivity extends Activity {
                             webView.evaluateJavascript(
                                     "window.PayMasterHceDiagnostic && " +
                                     "window.PayMasterHceDiagnostic(" +
-                                    quoted +
-                                    ");",
+                                    quoted + ");",
                                     null
                             );
                         }
@@ -221,14 +213,45 @@ public class MainActivity extends Activity {
     }
 
     @Override
+    protected void onActivityResult(
+            int requestCode,
+            int resultCode,
+            Intent data
+    ) {
+        IntentResult result =
+                IntentIntegrator.parseActivityResult(
+                        requestCode,
+                        resultCode,
+                        data
+                );
+
+        if (result != null) {
+            String contents = result.getContents();
+
+            final String quoted =
+                    JSONObject.quote(contents == null ? "" : contents);
+
+            if (webView != null) {
+                webView.evaluateJavascript(
+                        "window.PayMasterQrScanResult && " +
+                        "window.PayMasterQrScanResult(" + quoted + ");",
+                        null
+                );
+            }
+            return;
+        }
+
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
     protected void onDestroy() {
         NfcPaymentSession.disarm();
 
         if (paymentReceiver != null) {
             try {
                 unregisterReceiver(paymentReceiver);
-            } catch (Exception ignored) {
-            }
+            } catch (Exception ignored) {}
         }
 
         if (webView != null) {
@@ -237,6 +260,88 @@ public class MainActivity extends Activity {
         }
 
         super.onDestroy();
+    }
+
+    private String bitmapToDataUrl(Bitmap bitmap) throws Exception {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+        return "data:image/png;base64," +
+                Base64.encodeToString(
+                        out.toByteArray(),
+                        Base64.NO_WRAP
+                );
+    }
+
+    private Bitmap createCode(
+            String payload,
+            String type,
+            int width,
+            int height
+    ) throws Exception {
+        BarcodeFormat format =
+                "BARCODE".equalsIgnoreCase(type)
+                        ? BarcodeFormat.CODE_128
+                        : BarcodeFormat.QR_CODE;
+
+        BitMatrix matrix =
+                new MultiFormatWriter().encode(
+                        payload,
+                        format,
+                        Math.max(120, width),
+                        Math.max(120, height)
+                );
+
+        Bitmap bitmap = Bitmap.createBitmap(
+                matrix.getWidth(),
+                matrix.getHeight(),
+                Bitmap.Config.ARGB_8888
+        );
+
+        for (int y = 0; y < matrix.getHeight(); y++) {
+            for (int x = 0; x < matrix.getWidth(); x++) {
+                bitmap.setPixel(
+                        x,
+                        y,
+                        matrix.get(x, y)
+                                ? Color.BLACK
+                                : Color.WHITE
+                );
+            }
+        }
+
+        return bitmap;
+    }
+
+
+    private boolean isPackageInstalled(String packageName) {
+        try {
+            getPackageManager().getPackageInfo(packageName, 0);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private String getDeviceCapabilityJson() {
+        try {
+            JSONObject o = new JSONObject();
+            o.put("manufacturer", Build.MANUFACTURER);
+            o.put("brand", Build.BRAND);
+            o.put("model", Build.MODEL);
+            o.put("device", Build.DEVICE);
+            o.put("android", Build.VERSION.RELEASE);
+            o.put("sdk", Build.VERSION.SDK_INT);
+            o.put("nfcState", new Bridge().getNfcState());
+            o.put("samsungPayInstalled", isPackageInstalled("com.samsung.android.spay"));
+            o.put("samsungPayFrameworkInstalled", isPackageInstalled("com.samsung.android.spayfw"));
+            o.put("directMstApiAvailable", false);
+            o.put("directMstApiNote",
+                    "일반 앱에 공개된 직접 MST 송신 API는 확인되지 않음. " +
+                    "이 테스트는 기기/Wallet 존재 여부만 진단함.");
+            return o.toString();
+        } catch (Exception e) {
+            return "{\"error\":\"capability_failed\"}";
+        }
     }
 
     public class Bridge {
@@ -302,6 +407,70 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public void resetHceDiagnostics() {
             HceDiagnostics.reset(MainActivity.this);
+        }
+
+
+        @JavascriptInterface
+        public String getDeviceCapabilities() {
+            return getDeviceCapabilityJson();
+        }
+
+        @JavascriptInterface
+        public String getHceTraceText() {
+            return HceDiagnostics.traceText(MainActivity.this);
+        }
+
+        @JavascriptInterface
+        public boolean copyText(String label, String text) {
+            try {
+                ClipboardManager cm =
+                        (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                if (cm == null) return false;
+                cm.setPrimaryClip(
+                        ClipData.newPlainText(
+                                label == null ? "PayMaster" : label,
+                                text == null ? "" : text
+                        )
+                );
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+
+        @JavascriptInterface
+        public String generateCode(
+                String type,
+                String payload,
+                int width,
+                int height
+        ) {
+            try {
+                return bitmapToDataUrl(
+                        createCode(payload, type, width, height)
+                );
+            } catch (Exception e) {
+                Log.e(TAG, "Code generation failed", e);
+                return "";
+            }
+        }
+
+        @JavascriptInterface
+        public void scanQr() {
+            runOnUiThread(() -> {
+                IntentIntegrator integrator =
+                        new IntentIntegrator(MainActivity.this);
+
+                integrator.setDesiredBarcodeFormats(
+                        IntentIntegrator.QR_CODE
+                );
+                integrator.setPrompt(
+                        "교육용 결제 QR을 사각형 안에 맞춰 주세요."
+                );
+                integrator.setBeepEnabled(true);
+                integrator.setOrientationLocked(false);
+                integrator.initiateScan();
+            });
         }
     }
 }

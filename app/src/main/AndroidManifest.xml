@@ -1,8 +1,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission android:name="android.permission.NFC"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
     <uses-feature android:name="android.hardware.nfc" android:required="false"/>
     <uses-feature android:name="android.hardware.nfc.hce" android:required="false"/>
+
+    
+    <queries>
+        <package android:name="com.samsung.android.spay"/>
+        <package android:name="com.samsung.android.spayfw"/>
+    </queries>
 
     <application android:theme="@style/AppTheme" android:label="페이의 달인" android:allowBackup="true" android:supportsRtl="true">
         <activity android:name=".MainActivity" android:screenOrientation="portrait" android:exported="true">

@@ -48,3 +48,52 @@ export function resetHceDiagnostics(){
     window.AndroidBridge?.resetHceDiagnostics?.();
   }catch{}
 }
+
+
+export function generateCode(type, payload, width=520, height=520){
+  try{
+    if(window.AndroidBridge?.generateCode){
+      return window.AndroidBridge.generateCode(
+        type,
+        payload,
+        width,
+        height
+      ) || "";
+    }
+  }catch{}
+  return "";
+}
+
+export function scanQr(){
+  try{
+    window.AndroidBridge?.scanQr?.();
+    return true;
+  }catch{}
+  return false;
+}
+
+
+export function getDeviceCapabilities(){
+  try{
+    if(window.AndroidBridge?.getDeviceCapabilities){
+      return JSON.parse(window.AndroidBridge.getDeviceCapabilities() || "{}");
+    }
+  }catch{}
+  return {};
+}
+
+export function getHceTraceText(){
+  try{
+    if(window.AndroidBridge?.getHceTraceText){
+      return window.AndroidBridge.getHceTraceText() || "";
+    }
+  }catch{}
+  return "";
+}
+
+export function copyText(label,text){
+  try{
+    return !!window.AndroidBridge?.copyText?.(label,text);
+  }catch{}
+  return false;
+}
