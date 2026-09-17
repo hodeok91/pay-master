@@ -1,5 +1,7 @@
-페이의 달인 Modular v0.1.3 FULL
-versionCode=13
-MainActivity.java 선두 역슬래시 오류 수정
-GitHub Actions preflight 검증 추가
-부분 패치가 아닌 통합 전체 프로젝트
+페이의 달인 Modular v0.1.4 FULL
+versionCode=14
+등록 카드 하단 지문/비밀번호 인증
+지문 1초
+결제 비밀번호 1회 인증 분리
+결제 대기 자동 진입 + 매초 햅틱 + 0초 Wallet 복귀
+WebView 브라우저 기록 대신 앱 라우터 뒤로가기

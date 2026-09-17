@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.webkit.ConsoleMessage;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
@@ -50,6 +51,13 @@ public class MainActivity extends Activity {
             ) {
                 return assetLoader.shouldInterceptRequest(request.getUrl());
             }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                // 이 앱은 단일 WebView SPA이므로 브라우저 방문기록을 뒤로가기에 사용하지 않는다.
+                view.clearHistory();
+            }
         });
 
         webView.setWebChromeClient(new WebChromeClient() {
@@ -68,29 +76,40 @@ public class MainActivity extends Activity {
         });
 
         webView.addJavascriptInterface(new Bridge(), "AndroidBridge");
-
-        // ES module(import/export)을 file://로 열지 않는다.
         webView.loadUrl(
                 "https://appassets.androidplatform.net/assets/www/index.html"
+        );
+    }
+
+    private void handleAppBack() {
+        if (webView == null) {
+            finish();
+            return;
+        }
+
+        webView.evaluateJavascript(
+                "window.PayMaster && window.PayMaster.nativeBack ? window.PayMaster.nativeBack() : false",
+                result -> {
+                    if ("false".equals(result) || "null".equals(result)) {
+                        finish();
+                    }
+                }
         );
     }
 
     @Override
     @SuppressWarnings("deprecation")
     public void onBackPressed() {
-        if (webView == null) {
-            super.onBackPressed();
-            return;
-        }
+        handleAppBack();
+    }
 
-        webView.evaluateJavascript(
-                "window.PayMaster && window.PayMaster.back ? window.PayMaster.back() : false",
-                result -> {
-                    if ("false".equals(result) || "null".equals(result)) {
-                        MainActivity.super.onBackPressed();
-                    }
-                }
-        );
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            handleAppBack();
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     public class Bridge {

@@ -1,18 +1,61 @@
 class Router {
-  constructor(){ this.routes=new Map(); this.stack=[]; this.current=null; }
-  register(name, renderer){ this.routes.set(name, renderer); }
-  go(name, params={}, options={}){
-    const render=this.routes.get(name); if(!render) throw new Error("Unknown route: "+name);
-    if(!options.replace && this.current) this.stack.push(this.current);
-    this.current={name,params};
-    document.getElementById("app").replaceChildren(render(params));
+  constructor(){
+    this.routes = new Map();
+    this.stack = [];
+    this.current = null;
+  }
+
+  register(name, renderer){
+    this.routes.set(name, renderer);
+  }
+
+  render(entry){
+    const renderer = this.routes.get(entry.name);
+    if(!renderer) throw new Error("Unknown route: " + entry.name);
+    this.current = entry;
+    document.getElementById("app").replaceChildren(renderer(entry.params || {}));
+  }
+
+  go(name, params = {}, options = {}){
+    const next = {name, params};
+
+    if(options.reset){
+      this.stack = [];
+    } else if(!options.replace && this.current){
+      this.stack.push(this.current);
+    }
+
+    this.render(next);
     return true;
   }
+
+  replace(name, params = {}){
+    return this.go(name, params, {replace:true});
+  }
+
+  reset(name, params = {}){
+    return this.go(name, params, {replace:true, reset:true});
+  }
+
   back(){
-    if(!this.stack.length) return false;
-    const prev=this.stack.pop(); this.current=prev;
-    document.getElementById("app").replaceChildren(this.routes.get(prev.name)(prev.params));
-    return true;
+    if(this.stack.length){
+      this.render(this.stack.pop());
+      return true;
+    }
+
+    // Samsung Wallet 루트에서는 페이 선택 홈으로 돌아간다.
+    if(this.current?.name?.startsWith("samsung.") && this.current.name !== "samsung.wallet"){
+      this.reset("samsung.wallet");
+      return true;
+    }
+
+    if(this.current?.name === "samsung.wallet"){
+      this.reset("home");
+      return true;
+    }
+
+    return false;
   }
 }
-export const router=new Router();
+
+export const router = new Router();

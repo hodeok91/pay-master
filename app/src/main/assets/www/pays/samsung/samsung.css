@@ -12,3 +12,76 @@
 .auth-phone{width:42%;height:30%;margin:15vh auto 0;background:#dce1ec;border-radius:28px 28px 0 0;position:relative}
 .fingerprint{position:absolute;left:50%;bottom:10%;transform:translate(-50%,50%);width:120px;height:120px;border-radius:50%;background:#fff;color:#000;display:grid;place-items:center;font-size:58px;user-select:none}
 .payment-card{transform:rotate(90deg) scale(.82);margin:80px auto 10px}
+
+
+.registered-payment-auth{
+  width:min(82vw,620px);
+  margin:28px auto 0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:18px;
+}
+.wallet-fingerprint{
+  width:78px;
+  height:78px;
+  border-radius:50%;
+  border:2px solid #777;
+  background:#171719;
+  color:#fff;
+  display:grid;
+  place-items:center;
+  font-size:40px;
+  user-select:none;
+  touch-action:none;
+  position:relative;
+}
+.wallet-fingerprint.holding{
+  border-color:#7fa2ff;
+  box-shadow:0 0 0 8px rgba(83,126,255,.16);
+  transform:scale(1.04);
+}
+.wallet-password{
+  min-width:138px;
+  height:58px;
+  border-radius:30px;
+  border:1px solid #5f6065;
+  background:#242428;
+  color:#fff;
+  font-size:20px;
+  font-weight:800;
+}
+.auth-caption{
+  text-align:center;
+  color:#a9a9ae;
+  font-size:16px;
+  margin-top:12px;
+}
+.payment-wait{
+  min-height:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  padding-top:58px;
+}
+.payment-timer{
+  margin-top:34px;
+  border:1px solid #777;
+  border-radius:20px;
+  display:inline-block;
+  padding:7px 15px;
+  min-width:64px;
+  font-size:22px;
+  font-weight:800;
+}
+.nfc-wave{
+  margin-top:24px;
+  font-size:38px;
+  opacity:.9;
+  animation:nfcPulse 1s ease-in-out infinite;
+}
+@keyframes nfcPulse{
+  0%,100%{transform:scale(.94);opacity:.55}
+  50%{transform:scale(1.08);opacity:1}
+}

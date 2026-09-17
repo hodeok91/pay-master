@@ -10,5 +10,10 @@ router.register("splash", renderSplash);
 router.register("home", renderHome);
 samsungPay.registerRoutes(router);
 
-window.PayMaster = { back: () => router.back() };
-router.go("splash", {}, {replace:true});
+window.PayMaster = {
+  nativeBack: () => router.back(),
+  back: () => router.back(),
+  paymentApproved: () => router.reset("samsung.paymentComplete")
+};
+
+router.reset("splash");
