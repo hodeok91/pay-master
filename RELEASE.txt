@@ -1,5 +1,5 @@
-페이의 달인 Modular v0.1.5 FULL
-versionCode=15
-DALIN-PAY NFC Protocol v1 FROZEN
-AID=F044414C494E0101
-HostApduService + NFC session + WebView success callback
+페이의 달인 Modular v0.1.6 FULL HCE DIAGNOSTIC
+versionCode=16
+DALIN-PAY NFC Protocol v1 unchanged
+AID=F044414C494E0101 unchanged
+APDU RX/TX/AID/deactivation diagnostics added

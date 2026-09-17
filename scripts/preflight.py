@@ -89,6 +89,44 @@ if protocol_java.exists():
 if apdu_xml.exists() and "F044414C494E0101" not in apdu_xml.read_text(encoding="utf-8", errors="replace"):
     errors.append("HCE XML AID mismatch")
 
+# v0.1.6 HCE diagnostic checks.
+diag_java = root / "app/src/main/java/kr/dalin/paymaster/nfc/HceDiagnostics.java"
+diag_doc = root / "docs/EP705-HCE-DIAGNOSTIC-v0.1.6.md"
+diag_ps1 = root / "tools/ep705-hce-diagnostics.ps1"
+
+for p3 in [diag_java, diag_doc, diag_ps1]:
+    if not p3.exists():
+        errors.append(f"missing v0.1.6 diagnostic file: {p3.relative_to(root)}")
+
+if hce_service.exists():
+    hce_text = hce_service.read_text(encoding="utf-8", errors="replace")
+    for required_text in [
+        "HceDiagnostics.recordApdu",
+        "HceDiagnostics.recordOurAidSelected",
+        "HceDiagnostics.recordResponse",
+        "HceDiagnostics.recordDeactivated",
+        "[HCE_DIAG] APDU_RX",
+        "[HCE_DIAG] OUR_AID_SELECTED"
+    ]:
+        if required_text not in hce_text:
+            errors.append(f"HCE diagnostic hook missing: {required_text}")
+
+if ready_js.exists():
+    ready_text = ready_js.read_text(encoding="utf-8", errors="replace")
+    for required_text in [
+        "HCE 진단 보기",
+        "getHceDiagnostics",
+        "resetHceDiagnostics",
+        "PayMasterHceDiagnostic"
+    ]:
+        if required_text not in ready_text:
+            errors.append(f"payment-ready diagnostic UI missing: {required_text}")
+
+if protocol_java.exists():
+    protocol_text = protocol_java.read_text(encoding="utf-8", errors="replace")
+    if 'AID_HEX = "F044414C494E0101"' not in protocol_text:
+        errors.append("v0.1.6 must not change DALIN-PAY v1 AID.")
+
 if errors:
     print("PRECHECK FAILED")
     for e in errors:

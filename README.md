@@ -1,22 +1,31 @@
-# 페이의 달인 — Modular v0.1.5
+# 페이의 달인 — Modular v0.1.6 HCE Diagnostic
 
-이 ZIP은 부분 패치가 아닌 전체 프로젝트 기준본이다.
+이 ZIP은 **부분 패치가 아닌 전체 프로젝트 기준본**이다.
 
-## v0.1.5
-- DALIN-PAY NFC Protocol v1 확정
-- HostApduService 추가
-- 교육용 AID `F044414C494E0101`
-- NFC/HCE Manifest 등록
-- PING / GET_STATUS / REQUEST_PAYMENT
-- 지문/비밀번호 인증 후 50초 동안만 NFC 결제 허용
-- 한 인증 세션에서 한 번의 결제만 승인
-- NFC 꺼짐 / HCE 미지원 감지
-- 실제 리더 승인 시 WebView 결제완료 콜백
-- 50초 만료/화면 이탈 시 NFC 세션 해제
+## v0.1.6 목적
 
-상세 규격: `docs/DALIN-PAY-NFC-PROTOCOL-v1.md`
+EP-705 `FB1120 / mode=212` 결제대기 상태에서
+페이의 달인 HCE 서비스까지 실제 APDU가 전달되는지 확인한다.
 
-실제 신용카드/EMV 결제가 아니라 교육용 달인카드와 향후 키오스크의 달인 사이의 전용 통신이다.
+`DALIN-PAY NFC Protocol v1`의 AID와 명령 규격은
+v0.1.5와 동일하게 유지한다.
 
-- versionName: 0.1.5
-- versionCode: 15
+## 추가 기능
+
+- HCE APDU 수신 횟수
+- 마지막 APDU HEX
+- DALIN-PAY AID SELECT 여부
+- HCE deactivation 사유
+- APDU RX/TX logcat
+- 결제 대기 화면의 `HCE 진단 보기`
+- PC용 `tools/ep705-hce-diagnostics.ps1`
+
+## 버전
+
+- versionName: `0.1.6`
+- versionCode: `16`
+- DALIN-PAY NFC Protocol: `v1`
+- AID: `F044414C494E0101`
+
+상세:
+`docs/EP705-HCE-DIAGNOSTIC-v0.1.6.md`
