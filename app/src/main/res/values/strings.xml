@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">페이의 달인</string>
+    <string name="dalin_nfc_service">달인카드 교육용 NFC 서비스</string>
+    <string name="dalin_nfc_aid_group">DALIN-PAY NFC Protocol v1</string>
+</resources>

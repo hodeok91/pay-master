@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<host-apdu-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/dalin_nfc_service"
+    android:requireDeviceUnlock="false">
+    <aid-group android:category="other" android:description="@string/dalin_nfc_aid_group">
+        <aid-filter android:name="F044414C494E0101"/>
+    </aid-group>
+</host-apdu-service>

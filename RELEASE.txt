@@ -1,7 +1,5 @@
-페이의 달인 Modular v0.1.4 FULL
-versionCode=14
-등록 카드 하단 지문/비밀번호 인증
-지문 1초
-결제 비밀번호 1회 인증 분리
-결제 대기 자동 진입 + 매초 햅틱 + 0초 Wallet 복귀
-WebView 브라우저 기록 대신 앱 라우터 뒤로가기
+페이의 달인 Modular v0.1.5 FULL
+versionCode=15
+DALIN-PAY NFC Protocol v1 FROZEN
+AID=F044414C494E0101
+HostApduService + NFC session + WebView success callback

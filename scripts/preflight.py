@@ -71,6 +71,24 @@ if ready_js.exists():
     if 'router.reset("samsung.wallet")' not in t:
         errors.append("payment timeout does not return to registered wallet.")
 
+# v0.1.5 NFC/HCE contract checks.
+hce_service = root / "app/src/main/java/kr/dalin/paymaster/nfc/DalinHostApduService.java"
+protocol_java = root / "app/src/main/java/kr/dalin/paymaster/nfc/DalinPayProtocol.java"
+session_java = root / "app/src/main/java/kr/dalin/paymaster/nfc/NfcPaymentSession.java"
+apdu_xml = root / "app/src/main/res/xml/dalin_apdu_service.xml"
+protocol_doc = root / "docs/DALIN-PAY-NFC-PROTOCOL-v1.md"
+for p2 in [hce_service, protocol_java, session_java, apdu_xml, protocol_doc]:
+    if not p2.exists(): errors.append(f"missing NFC/HCE file: {p2.relative_to(root)}")
+if manifest.exists():
+    mt = manifest.read_text(encoding="utf-8", errors="replace")
+    for req in ["android.permission.NFC","android.permission.BIND_NFC_SERVICE",".nfc.DalinHostApduService","android.nfc.cardemulation.action.HOST_APDU_SERVICE","@xml/dalin_apdu_service"]:
+        if req not in mt: errors.append(f"manifest missing NFC/HCE contract: {req}")
+if protocol_java.exists():
+    pt = protocol_java.read_text(encoding="utf-8", errors="replace")
+    if 'AID_HEX = "F044414C494E0101"' not in pt: errors.append("DALIN-PAY v1 AID mismatch")
+if apdu_xml.exists() and "F044414C494E0101" not in apdu_xml.read_text(encoding="utf-8", errors="replace"):
+    errors.append("HCE XML AID mismatch")
+
 if errors:
     print("PRECHECK FAILED")
     for e in errors:
