@@ -46,6 +46,18 @@ export function renderPaymentReady(){
         <div>DALIN AID 선택: <span id="diagAid">아직 없음</span></div>
         <div>마지막 이벤트: <span id="diagEvent">없음</span></div>
         <div>마지막 비활성화: <span id="diagDeactivate">없음</span></div>
+        <hr style="border:0;border-top:1px solid #333;margin:12px 0">
+        <div>RF field detected: <span id="diagRfField">UNKNOWN</span></div>
+        <div>RF field events: <span id="diagRfEvents">0</span></div>
+        <div>AID not routed: <span id="diagAidNotRouted">0</span></div>
+        <div>AID conflict: <span id="diagAidConflict">0</span></div>
+        <div>Last routing event: <span id="diagRoutingEvent">-</span></div>
+        <div>Last routing AID: <span id="diagRoutingAid">-</span></div>
+        <div>Preferred service: <span id="diagPreferred">UNKNOWN</span></div>
+        <div>Observe mode: <span id="diagObserveMode">UNKNOWN</span></div>
+        <div>Off-host selected: <span id="diagOffHost">-</span></div>
+        <div>NFC internal error: <span id="diagInternalError">-</span></div>
+        <div>Last NFC state: <span id="diagNfcStateEvent">UNKNOWN</span></div>
 
         <div style="margin-top:7px;color:#aaa;word-break:break-all">
           마지막 APDU:<br>
@@ -106,6 +118,29 @@ export function renderPaymentReady(){
 
     s.querySelector("#diagDeactivate").textContent =
       d.lastDeactivateReason || "없음";
+
+    s.querySelector("#diagRfField").textContent =
+      d.remoteFieldDetected || "UNKNOWN";
+    s.querySelector("#diagRfEvents").textContent =
+      String(d.remoteFieldEventCount || 0);
+    s.querySelector("#diagAidNotRouted").textContent =
+      String(d.aidNotRoutedCount || 0);
+    s.querySelector("#diagAidConflict").textContent =
+      String(d.aidConflictCount || 0);
+    s.querySelector("#diagRoutingEvent").textContent =
+      d.lastRoutingEvent || "-";
+    s.querySelector("#diagRoutingAid").textContent =
+      d.lastRoutingAid || "-";
+    s.querySelector("#diagPreferred").textContent =
+      d.preferredService || "UNKNOWN";
+    s.querySelector("#diagObserveMode").textContent =
+      d.observeMode || "UNKNOWN";
+    s.querySelector("#diagOffHost").textContent =
+      d.offHostSelection || "-";
+    s.querySelector("#diagInternalError").textContent =
+      d.lastNfcInternalError || "-";
+    s.querySelector("#diagNfcStateEvent").textContent =
+      d.lastNfcState || "UNKNOWN";
 
     s.querySelector("#diagApdu").textContent =
       d.lastApduHex || "없음";

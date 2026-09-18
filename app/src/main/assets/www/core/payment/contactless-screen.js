@@ -72,6 +72,18 @@ export function renderContactlessScreen({
         <div><b>DALIN AID 선택</b>: <span id="aidSelected">아직 없음</span></div>
         <div><b>마지막 이벤트</b>: <span id="lastEvent">-</span></div>
         <div><b>비활성화</b>: <span id="deact">-</span></div>
+        <hr style="border:0;border-top:1px solid #333;margin:12px 0">
+        <div><b>RF field detected</b>: <span id="rfField">UNKNOWN</span></div>
+        <div><b>RF field events</b>: <span id="rfEvents">0</span></div>
+        <div><b>AID not routed</b>: <span id="aidNotRouted">0</span></div>
+        <div><b>AID conflict</b>: <span id="aidConflict">0</span></div>
+        <div><b>Last routing event</b>: <span id="routingEvent">-</span></div>
+        <div><b>Last routing AID</b>: <span id="routingAid">-</span></div>
+        <div><b>Preferred service</b>: <span id="preferredService">UNKNOWN</span></div>
+        <div><b>Observe mode</b>: <span id="observeMode">UNKNOWN</span></div>
+        <div><b>Off-host selected</b>: <span id="offHostSelection">-</span></div>
+        <div><b>NFC internal error</b>: <span id="nfcInternalError">-</span></div>
+        <div><b>Last NFC state</b>: <span id="lastNfcState">UNKNOWN</span></div>
         <div style="margin-top:7px;word-break:break-all">
           <b>마지막 APDU</b><br><span id="lastApdu">-</span>
         </div>
@@ -107,6 +119,17 @@ export function renderContactlessScreen({
       d.ourAidSelected ? "선택됨" : "아직 없음";
     s.querySelector("#lastEvent").textContent = d.lastEvent || "-";
     s.querySelector("#deact").textContent = d.lastDeactivateReason || "-";
+    s.querySelector("#rfField").textContent = d.remoteFieldDetected || "UNKNOWN";
+    s.querySelector("#rfEvents").textContent = String(d.remoteFieldEventCount || 0);
+    s.querySelector("#aidNotRouted").textContent = String(d.aidNotRoutedCount || 0);
+    s.querySelector("#aidConflict").textContent = String(d.aidConflictCount || 0);
+    s.querySelector("#routingEvent").textContent = d.lastRoutingEvent || "-";
+    s.querySelector("#routingAid").textContent = d.lastRoutingAid || "-";
+    s.querySelector("#preferredService").textContent = d.preferredService || "UNKNOWN";
+    s.querySelector("#observeMode").textContent = d.observeMode || "UNKNOWN";
+    s.querySelector("#offHostSelection").textContent = d.offHostSelection || "-";
+    s.querySelector("#nfcInternalError").textContent = d.lastNfcInternalError || "-";
+    s.querySelector("#lastNfcState").textContent = d.lastNfcState || "UNKNOWN";
     s.querySelector("#lastApdu").textContent = d.lastApduHex || "-";
   };
 

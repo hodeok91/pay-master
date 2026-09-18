@@ -12,6 +12,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.nfc.NfcAdapter;
+import android.nfc.cardemulation.CardEmulation;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.VibrationEffect;
@@ -50,6 +51,7 @@ public class MainActivity extends Activity {
 
     private WebView webView;
     private BroadcastReceiver paymentReceiver;
+    private Object nfcEventRegistration;
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -97,6 +99,7 @@ public class MainActivity extends Activity {
 
         webView.addJavascriptInterface(new Bridge(), "AndroidBridge");
         registerPaymentReceiver();
+        registerNfcEventDiagnostics();
 
         webView.loadUrl(
                 "https://appassets.androidplatform.net/assets/www/index.html"
@@ -246,6 +249,7 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        unregisterNfcEventDiagnostics();
         NfcPaymentSession.disarm();
 
         if (paymentReceiver != null) {
@@ -260,6 +264,126 @@ public class MainActivity extends Activity {
         }
 
         super.onDestroy();
+    }
+
+    private void registerNfcEventDiagnostics() {
+        if (Build.VERSION.SDK_INT < 36) return;
+
+        try {
+            nfcEventRegistration = Api36NfcDiagnostics.register(this);
+        } catch (Exception e) {
+            nfcEventRegistration = null;
+            Log.w(TAG, "API 36 NFC event callback registration failed", e);
+        }
+    }
+
+    private void unregisterNfcEventDiagnostics() {
+        if (Build.VERSION.SDK_INT < 36 || nfcEventRegistration == null) return;
+
+        try {
+            Api36NfcDiagnostics.unregister(nfcEventRegistration);
+        } catch (Exception e) {
+            Log.w(TAG, "API 36 NFC event callback unregister failed", e);
+        } finally {
+            nfcEventRegistration = null;
+        }
+    }
+
+    @SuppressLint("NewApi")
+    private static final class Api36NfcDiagnostics {
+        private Api36NfcDiagnostics() {}
+
+        static Object register(MainActivity activity) {
+            NfcAdapter adapter = NfcAdapter.getDefaultAdapter(activity);
+            if (adapter == null) return null;
+
+            CardEmulation cardEmulation = CardEmulation.getInstance(adapter);
+            CardEmulation.NfcEventCallback callback =
+                    new CardEmulation.NfcEventCallback() {
+                        @Override
+                        public void onRemoteFieldChanged(boolean isDetected) {
+                            HceDiagnostics.recordRemoteFieldChanged(
+                                    activity,
+                                    isDetected
+                            );
+                        }
+
+                        @Override
+                        public void onAidConflictOccurred(String aid) {
+                            HceDiagnostics.recordAidConflict(activity, aid);
+                        }
+
+                        @Override
+                        public void onAidNotRouted(String aid) {
+                            HceDiagnostics.recordAidNotRouted(activity, aid);
+                        }
+
+                        @Override
+                        public void onPreferredServiceChanged(boolean isPreferred) {
+                            HceDiagnostics.recordPreferredServiceChanged(
+                                    activity,
+                                    isPreferred
+                            );
+                        }
+
+                        @Override
+                        public void onInternalErrorReported(int errorType) {
+                            HceDiagnostics.recordNfcInternalError(
+                                    activity,
+                                    errorType
+                            );
+                        }
+
+                        @Override
+                        public void onNfcStateChanged(int state) {
+                            HceDiagnostics.recordNfcStateChanged(activity, state);
+                        }
+
+                        @Override
+                        public void onObserveModeStateChanged(boolean isEnabled) {
+                            HceDiagnostics.recordObserveModeChanged(
+                                    activity,
+                                    isEnabled
+                            );
+                        }
+
+                        // Added to the platform callback in the API 36.1 SDK.
+                        // Keeping the matching public signature is harmless on
+                        // base API 36 and receives it on runtimes that expose it.
+                        public void onOffHostAidSelected(
+                                String aid,
+                                String offHostSecureElement
+                        ) {
+                            HceDiagnostics.recordOffHostAidSelected(activity, aid);
+                        }
+                    };
+
+            cardEmulation.registerNfcEventCallback(
+                    activity.getMainExecutor(),
+                    callback
+            );
+            return new Registration(cardEmulation, callback);
+        }
+
+        static void unregister(Object token) {
+            Registration registration = (Registration) token;
+            registration.cardEmulation.unregisterNfcEventCallback(
+                    registration.callback
+            );
+        }
+
+        private static final class Registration {
+            final CardEmulation cardEmulation;
+            final CardEmulation.NfcEventCallback callback;
+
+            Registration(
+                    CardEmulation cardEmulation,
+                    CardEmulation.NfcEventCallback callback
+            ) {
+                this.cardEmulation = cardEmulation;
+                this.callback = callback;
+            }
+        }
     }
 
     private String bitmapToDataUrl(Bitmap bitmap) throws Exception {

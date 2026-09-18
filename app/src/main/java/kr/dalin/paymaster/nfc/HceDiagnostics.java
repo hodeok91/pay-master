@@ -3,6 +3,7 @@ package kr.dalin.paymaster.nfc;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.nfc.NfcAdapter;
 import android.os.SystemClock;
 
 import org.json.JSONArray;
@@ -26,6 +27,17 @@ public final class HceDiagnostics {
                 .putString("lastApduHex", "")
                 .putString("lastEvent", "RESET")
                 .putString("lastDeactivateReason", "")
+                .putString("remoteFieldDetected", "UNKNOWN")
+                .putInt("remoteFieldEventCount", 0)
+                .putString("lastRoutingEvent", "")
+                .putString("lastRoutingAid", "")
+                .putInt("aidConflictCount", 0)
+                .putInt("aidNotRoutedCount", 0)
+                .putString("preferredService", "UNKNOWN")
+                .putString("observeMode", "UNKNOWN")
+                .putString("offHostSelection", "")
+                .putString("lastNfcInternalError", "")
+                .putString("lastNfcState", "UNKNOWN")
                 .putString("traceJson", "[]")
                 .putLong("lastEventElapsedMs", SystemClock.elapsedRealtime())
                 .apply();
@@ -86,6 +98,130 @@ public final class HceDiagnostics {
         emit(context, "DEACTIVATED", reasonText);
     }
 
+    public static synchronized void recordRemoteFieldChanged(
+            Context context,
+            boolean detected
+    ) {
+        SharedPreferences p = prefs(context);
+        int count = p.getInt("remoteFieldEventCount", 0) + 1;
+        String state = detected ? "YES" : "NO";
+
+        p.edit()
+                .putString("remoteFieldDetected", state)
+                .putInt("remoteFieldEventCount", count)
+                .putString("lastRoutingEvent", "REMOTE_FIELD_" + state)
+                .putLong("lastEventElapsedMs", SystemClock.elapsedRealtime())
+                .apply();
+
+        appendTrace(context, "RF_FIELD", state);
+        emit(context, "REMOTE_FIELD_CHANGED", state);
+    }
+
+    public static synchronized void recordAidConflict(Context context, String aid) {
+        SharedPreferences p = prefs(context);
+        int count = p.getInt("aidConflictCount", 0) + 1;
+        String safeAid = systemAid(aid);
+
+        p.edit()
+                .putInt("aidConflictCount", count)
+                .putString("lastRoutingEvent", "AID_CONFLICT")
+                .putString("lastRoutingAid", safeAid)
+                .putLong("lastEventElapsedMs", SystemClock.elapsedRealtime())
+                .apply();
+
+        appendTrace(context, "AID_CONFLICT", safeAid);
+        emit(context, "AID_CONFLICT", safeAid);
+    }
+
+    public static synchronized void recordAidNotRouted(Context context, String aid) {
+        SharedPreferences p = prefs(context);
+        int count = p.getInt("aidNotRoutedCount", 0) + 1;
+        String safeAid = systemAid(aid);
+
+        p.edit()
+                .putInt("aidNotRoutedCount", count)
+                .putString("lastRoutingEvent", "AID_NOT_ROUTED")
+                .putString("lastRoutingAid", safeAid)
+                .putLong("lastEventElapsedMs", SystemClock.elapsedRealtime())
+                .apply();
+
+        appendTrace(context, "AID_NOT_ROUTED", safeAid);
+        emit(context, "AID_NOT_ROUTED", safeAid);
+    }
+
+    public static synchronized void recordPreferredServiceChanged(
+            Context context,
+            boolean preferred
+    ) {
+        String state = preferred ? "YES" : "NO";
+        prefs(context).edit()
+                .putString("preferredService", state)
+                .putString("lastRoutingEvent", "PREFERRED_SERVICE_" + state)
+                .putLong("lastEventElapsedMs", SystemClock.elapsedRealtime())
+                .apply();
+
+        appendTrace(context, "PREFERRED_SERVICE", state);
+        emit(context, "PREFERRED_SERVICE_CHANGED", state);
+    }
+
+    public static synchronized void recordObserveModeChanged(
+            Context context,
+            boolean enabled
+    ) {
+        String state = enabled ? "ON" : "OFF";
+        prefs(context).edit()
+                .putString("observeMode", state)
+                .putString("lastRoutingEvent", "OBSERVE_MODE_" + state)
+                .putLong("lastEventElapsedMs", SystemClock.elapsedRealtime())
+                .apply();
+
+        appendTrace(context, "OBSERVE_MODE", state);
+        emit(context, "OBSERVE_MODE_CHANGED", state);
+    }
+
+    public static synchronized void recordOffHostAidSelected(
+            Context context,
+            String aid
+    ) {
+        String safeAid = systemAid(aid);
+        prefs(context).edit()
+                .putString("offHostSelection", safeAid)
+                .putString("lastRoutingEvent", "OFF_HOST_AID_SELECTED")
+                .putString("lastRoutingAid", safeAid)
+                .putLong("lastEventElapsedMs", SystemClock.elapsedRealtime())
+                .apply();
+
+        appendTrace(context, "OFF_HOST_AID", safeAid);
+        emit(context, "OFF_HOST_AID_SELECTED", safeAid);
+    }
+
+    public static synchronized void recordNfcInternalError(
+            Context context,
+            int errorType
+    ) {
+        String detail = "TYPE_" + errorType;
+        prefs(context).edit()
+                .putString("lastNfcInternalError", detail)
+                .putString("lastRoutingEvent", "NFC_INTERNAL_ERROR")
+                .putLong("lastEventElapsedMs", SystemClock.elapsedRealtime())
+                .apply();
+
+        appendTrace(context, "NFC_INTERNAL_ERROR", detail);
+        emit(context, "NFC_INTERNAL_ERROR", detail);
+    }
+
+    public static synchronized void recordNfcStateChanged(Context context, int state) {
+        String stateText = nfcStateText(state);
+        prefs(context).edit()
+                .putString("lastNfcState", stateText)
+                .putString("lastRoutingEvent", "NFC_STATE_" + stateText)
+                .putLong("lastEventElapsedMs", SystemClock.elapsedRealtime())
+                .apply();
+
+        appendTrace(context, "NFC_STATE", stateText);
+        emit(context, "NFC_STATE_CHANGED", stateText);
+    }
+
     private static void appendTrace(Context context, String type, String detail) {
         try {
             SharedPreferences p = prefs(context);
@@ -116,6 +252,17 @@ public final class HceDiagnostics {
             o.put("lastApduHex", p.getString("lastApduHex", ""));
             o.put("lastEvent", p.getString("lastEvent", ""));
             o.put("lastDeactivateReason", p.getString("lastDeactivateReason", ""));
+            o.put("remoteFieldDetected", p.getString("remoteFieldDetected", "UNKNOWN"));
+            o.put("remoteFieldEventCount", p.getInt("remoteFieldEventCount", 0));
+            o.put("lastRoutingEvent", p.getString("lastRoutingEvent", ""));
+            o.put("lastRoutingAid", p.getString("lastRoutingAid", ""));
+            o.put("aidConflictCount", p.getInt("aidConflictCount", 0));
+            o.put("aidNotRoutedCount", p.getInt("aidNotRoutedCount", 0));
+            o.put("preferredService", p.getString("preferredService", "UNKNOWN"));
+            o.put("observeMode", p.getString("observeMode", "UNKNOWN"));
+            o.put("offHostSelection", p.getString("offHostSelection", ""));
+            o.put("lastNfcInternalError", p.getString("lastNfcInternalError", ""));
+            o.put("lastNfcState", p.getString("lastNfcState", "UNKNOWN"));
             o.put("lastEventElapsedMs", p.getLong("lastEventElapsedMs", 0L));
             o.put("aid", DalinPayProtocol.AID_HEX);
             o.put("protocolVersion", DalinPayProtocol.PROTOCOL_VERSION);
@@ -136,6 +283,17 @@ public final class HceDiagnostics {
             sb.append("APDU_COUNT=").append(snap.optInt("apduCount")).append('\n');
             sb.append("OUR_AID_SELECTED=").append(snap.optBoolean("ourAidSelected")).append('\n');
             sb.append("LAST_DEACTIVATE=").append(snap.optString("lastDeactivateReason")).append('\n');
+            sb.append("REMOTE_FIELD=").append(snap.optString("remoteFieldDetected")).append('\n');
+            sb.append("REMOTE_FIELD_EVENTS=").append(snap.optInt("remoteFieldEventCount")).append('\n');
+            sb.append("AID_NOT_ROUTED=").append(snap.optInt("aidNotRoutedCount")).append('\n');
+            sb.append("AID_CONFLICT=").append(snap.optInt("aidConflictCount")).append('\n');
+            sb.append("LAST_ROUTING_EVENT=").append(snap.optString("lastRoutingEvent")).append('\n');
+            sb.append("LAST_ROUTING_AID=").append(snap.optString("lastRoutingAid")).append('\n');
+            sb.append("PREFERRED_SERVICE=").append(snap.optString("preferredService")).append('\n');
+            sb.append("OBSERVE_MODE=").append(snap.optString("observeMode")).append('\n');
+            sb.append("OFF_HOST_SELECTION=").append(snap.optString("offHostSelection")).append('\n');
+            sb.append("LAST_NFC_INTERNAL_ERROR=").append(snap.optString("lastNfcInternalError")).append('\n');
+            sb.append("LAST_NFC_STATE=").append(snap.optString("lastNfcState")).append('\n');
             sb.append('\n');
 
             if (trace != null) {
@@ -158,6 +316,18 @@ public final class HceDiagnostics {
 
     private static SharedPreferences prefs(Context context) {
         return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+    }
+
+    private static String systemAid(String aid) {
+        return aid == null ? "" : aid;
+    }
+
+    private static String nfcStateText(int state) {
+        if (state == NfcAdapter.STATE_OFF) return "OFF";
+        if (state == NfcAdapter.STATE_TURNING_ON) return "TURNING_ON";
+        if (state == NfcAdapter.STATE_ON) return "ON";
+        if (state == NfcAdapter.STATE_TURNING_OFF) return "TURNING_OFF";
+        return "UNKNOWN_" + state;
     }
 
     private static void emit(Context context, String type, String detail) {
